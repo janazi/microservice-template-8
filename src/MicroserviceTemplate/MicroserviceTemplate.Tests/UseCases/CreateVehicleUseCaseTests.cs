@@ -44,7 +44,7 @@ public class CreateVehicleUseCaseTests
             mapperMock.Object);
 
         // Act
-        var result = await useCreateVehicleUseCase.ExecuteAsync(new CreateVehicleCommand { Vin = vin });
+        var result = await useCreateVehicleUseCase.ExecuteAsync(new CreateVehicleCommand(vin));
 
         // Assert
         Assert.IsTrue(result.IsSuccess);
