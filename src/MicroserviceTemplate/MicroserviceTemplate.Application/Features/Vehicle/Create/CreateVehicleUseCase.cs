@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
-using LanguageExt.Common;
-using MicroserviceTemplate.Application.Features.Vehicle.UseCases;
+using MicroserviceTemplate.Domain.Entities;
 using MicroserviceTemplate.Domain.Repositories;
 
 namespace MicroserviceTemplate.Application.Features.Vehicle.Create;
@@ -17,14 +16,14 @@ public class CreateVehicleUseCase(IValidator<CreateVehicleCommand> validator,
         if (!validationResult.IsValid)
         {
             var error = new ValidationException(validationResult.Errors);
-            return new Result<VehicleViewModel>(error);
+            return error;
         }
 
         var vehicle = new Domain.Entities.Vehicle(command.Vin);
         var operationResult = await vehicleRepository.CreateAsync(vehicle, cancellationToken);
-        if (!operationResult.IsSuccess) return new Result<VehicleViewModel>(operationResult.Error);
+        if (operationResult is { IsSuccess: false, Error: not null }) return operationResult.Error;
 
         var vehicleViewModel = mapper.Map<VehicleViewModel>(vehicle);
-        return new Result<VehicleViewModel>(vehicleViewModel);
+        return vehicleViewModel;
     }
 }

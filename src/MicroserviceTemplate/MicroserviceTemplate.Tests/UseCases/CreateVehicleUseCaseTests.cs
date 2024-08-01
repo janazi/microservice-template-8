@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
+using FluentValidation.Results;
 using MicroserviceTemplate.Application.Features.Vehicle;
 using MicroserviceTemplate.Application.Features.Vehicle.Create;
 using MicroserviceTemplate.Domain.Entities;
@@ -13,13 +14,50 @@ namespace MicroserviceTemplate.Tests.UseCases;
 [TestClass]
 public class CreateVehicleUseCaseTests
 {
+    public Mock<IValidator<CreateVehicleCommand>> ValidatorMock { get; set; }
+
+    [TestInitialize]
+    public void Setup()
+    {
+        ValidatorMock = new Mock<IValidator<CreateVehicleCommand>>();
+    }
+
+    [TestMethod]
+    public async Task WhenCommandIsInvalidShouldReturnError()
+    {
+        // Arrange
+        ValidatorMock.Setup(x => x.ValidateAsync(
+                It.IsAny<CreateVehicleCommand>(),
+                default))
+            .ReturnsAsync(new ValidationResult(new List<ValidationFailure>
+            {
+                new("Vin", "Vin is required")
+            }))
+            .Verifiable();
+
+        var useCreateVehicleUseCase = new CreateVehicleUseCase(ValidatorMock.Object,
+            new Mock<IVehicleRepository>().Object,
+            new Mock<IMapper>().Object);
+
+        // Act
+        var result = await useCreateVehicleUseCase.ExecuteAsync(new CreateVehicleCommand(""));
+
+        // Assert
+        Assert.IsTrue(result.IsFail);
+        result.IfFail(c => Assert.IsTrue(c.Message.Contains("Vin is required")));
+
+
+        ValidatorMock.Verify(x => x.ValidateAsync(
+            It.IsAny<CreateVehicleCommand>(),
+            default), Times.Once);
+    }
+
     [TestMethod]
     public async Task WhenCommandIsValidShouldCreateVehicle()
     {
         const string vin = "1M8GDM9AXKP042788";
         // Arrange
-        var validatorMock = new Mock<IValidator<CreateVehicleCommand>>();
-        validatorMock.Setup(x => x.ValidateAsync(
+        ValidatorMock.Setup(x => x.ValidateAsync(
                 It.IsAny<CreateVehicleCommand>(),
                 default))
             .ReturnsAsync(new FluentValidation.Results.ValidationResult())
@@ -39,7 +77,7 @@ public class CreateVehicleUseCaseTests
             .Verifiable();
 
 
-        var useCreateVehicleUseCase = new CreateVehicleUseCase(validatorMock.Object,
+        var useCreateVehicleUseCase = new CreateVehicleUseCase(ValidatorMock.Object,
             vehicleRepositoryMock.Object,
             mapperMock.Object);
 
@@ -48,15 +86,10 @@ public class CreateVehicleUseCaseTests
 
         // Assert
         Assert.IsTrue(result.IsSuccess);
+        Assert.IsNotNull(result.Value);
+        Assert.AreEqual(vin, result.Value.Vin);
 
-        var vehicle = result.Match(
-            vehicle => vehicle,
-            error => throw error);
-
-        Assert.IsNotNull(vehicle);
-        Assert.AreEqual(vin, vehicle.Vin);
-
-        validatorMock.Verify(x => x.ValidateAsync(
+        ValidatorMock.Verify(x => x.ValidateAsync(
             It.IsAny<CreateVehicleCommand>(),
             default), Times.Once);
 

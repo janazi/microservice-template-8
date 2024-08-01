@@ -1,7 +1,6 @@
 ﻿using Asp.Versioning;
 using MicroserviceTemplate.Application.Features.Vehicle;
 using MicroserviceTemplate.Application.Features.Vehicle.Create;
-using MicroserviceTemplate.Application.Features.Vehicle.UseCases;
 using MicroserviceTemplate.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,9 +23,10 @@ public class VehiclesController : ControllerBase
         CancellationToken cancellationToken)
     {
         var result = await createVehicleUseCase.ExecuteAsync(createVehicleCommand, cancellationToken);
-        return result.Match<ActionResult<Vehicle>>(
-            vehicle => CreatedAtAction("GetById", new { VehicleId = vehicle.Id }, vehicle),
-            error => UnprocessableEntity(error));
+        if (result.IsSuccess)
+            return Ok(result);
+
+        return UnprocessableEntity(result.Error);
     }
 
     [HttpGet("{vehicleId}")]

@@ -1,7 +1,6 @@
-﻿using LanguageExt.Common;
-using MicroserviceTemplate.Application.Features.Vehicle.Create;
+﻿using MicroserviceTemplate.Domain.Entities;
 
-namespace MicroserviceTemplate.Application.Features.Vehicle.UseCases;
+namespace MicroserviceTemplate.Application.Features.Vehicle.Create;
 
 public interface ICreateVehicleUseCase
 {
