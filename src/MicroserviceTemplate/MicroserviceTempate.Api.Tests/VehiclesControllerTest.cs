@@ -1,17 +1,22 @@
 using MicroserviceTemplate.Domain.Entities;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
+using RulesEngine.Api.IntegrationTests;
 using System.Net;
 using System.Text.Json;
 
 namespace MicroserviceTemplate.Api;
 
-public class VehiclesControllerTest(WebApplicationFactory<Program> webApplicationFactory)
+[CollectionDefinition(nameof(PostgressCollection))]
+public class PostgressCollection : ICollectionFixture<PostgresFixture>;
+
+[Collection(nameof(PostgressCollection))]
+public class VehiclesControllerTest(CustomWebApplicationFactory<Program> webApplicationFactory)
     : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly HttpClient _httpClient = webApplicationFactory.CreateClient();
 
-    public class Get(WebApplicationFactory<Program> webApplicationFactory) : VehiclesControllerTest(webApplicationFactory)
+    public class Get(CustomWebApplicationFactory<Program> webApplicationFactory) : VehiclesControllerTest(webApplicationFactory)
     {
 
         private const string Endpoint = "/WeatherForecast";
@@ -38,7 +43,7 @@ public class VehiclesControllerTest(WebApplicationFactory<Program> webApplicatio
         }
     }
 
-    public class Post(WebApplicationFactory<Program> webApplicationFactory)
+    public class Post(CustomWebApplicationFactory<Program> webApplicationFactory)
         : VehiclesControllerTest(webApplicationFactory)
     {
         //TODO: IMPLEMENT POST TESTS
