@@ -10,7 +10,7 @@ public class BaseEntityDateInterceptor : SaveChangesInterceptor
         InterceptionResult<int> result,
         CancellationToken cancellationToken = new())
     {
-        if (!IsAuditEntity(eventData, result))
+        if (!IsAuditEntity(eventData))
             return base.SavingChangesAsync(eventData, result, cancellationToken);
 
 
@@ -18,7 +18,7 @@ public class BaseEntityDateInterceptor : SaveChangesInterceptor
         return base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
-    private static bool IsAuditEntity(DbContextEventData eventData, InterceptionResult<int> result)
+    private static bool IsAuditEntity(DbContextEventData eventData)
     {
         return eventData.Context is not null &&
             eventData.Context.ChangeTracker.Entries<IAuditableEntity>().ToList().Count > 0;
@@ -26,7 +26,7 @@ public class BaseEntityDateInterceptor : SaveChangesInterceptor
 
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {
-        if (!IsAuditEntity(eventData, result))
+        if (!IsAuditEntity(eventData))
             return base.SavingChanges(eventData, result);
 
         SetAuditProperties(eventData);
