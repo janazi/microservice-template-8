@@ -5,15 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace RulesEngine.Api.IntegrationTests;
+namespace MicroserviceTemplate.Api;
 public class CustomWebApplicationFactory<TProgram>
     : WebApplicationFactory<TProgram> where TProgram : class
 {
     public IServiceCollection? _services;
-    public IServiceScopeFactory _scopeFactoryForTest;
-    public IServiceCollection _servicesForTest;
-    private object lockObject = new object();
-
+    public IServiceScopeFactory? _scopeFactoryForTest;
+    public IServiceCollection? _servicesForTest;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {

@@ -1,6 +1,6 @@
 ﻿using Testcontainers.PostgreSql;
 
-namespace RulesEngine.Api.IntegrationTests;
+namespace MicroserviceTemplate.Api;
 public class PostgresFixture : IAsyncLifetime
 {
     private readonly PostgreSqlContainer? _postgresSqlContainer;

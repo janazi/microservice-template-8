@@ -1,51 +1,45 @@
-using MicroserviceTemplate.Domain.Entities;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
-using RulesEngine.Api.IntegrationTests;
+using MicroserviceTemplate.Api;
+using MicroserviceTemplate.Infra.Data;
+using Microsoft.Extensions.DependencyInjection;
 using System.Net;
-using System.Text.Json;
+using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-namespace MicroserviceTemplate.Api;
+
+namespace RulesEngine.Api.IntegrationTests;
 
 [CollectionDefinition(nameof(PostgressCollection))]
 public class PostgressCollection : ICollectionFixture<PostgresFixture>;
 
+
 [Collection(nameof(PostgressCollection))]
-public class VehiclesControllerTest(CustomWebApplicationFactory<Program> webApplicationFactory)
-    : IClassFixture<WebApplicationFactory<Program>>
+public class VehiclesControllerTests(CustomWebApplicationFactory<Program> webApplicationFactory)
+    : IClassFixture<CustomWebApplicationFactory<Program>>
 {
     private readonly HttpClient _httpClient = webApplicationFactory.CreateClient();
+    private readonly CustomWebApplicationFactory<Program> webApplicationFactory = webApplicationFactory;
 
-    public class Get(CustomWebApplicationFactory<Program> webApplicationFactory) : VehiclesControllerTest(webApplicationFactory)
+
+    [Collection(nameof(PostgressCollection))]
+    public class Get(CustomWebApplicationFactory<Program> webApplicationFactory) : VehiclesControllerTests(webApplicationFactory)
     {
 
-        private const string Endpoint = "/WeatherForecast";
+        private const string Endpoint = "/api/1.0/vehicles";
+        private readonly CustomWebApplicationFactory<Program> _webApplicationFactory = webApplicationFactory;
 
         [Fact]
-        public async Task Should_respond_a_status_200_ok()
+        public async Task ShouldRespondWith200ContainingACollectionOfRulesetDto()
         {
+            var sp = _webApplicationFactory._services!.BuildServiceProvider();
+            var dbContext = sp.GetRequiredService<ApiDbContext>();
+
+            //await dbContext.Rulesets.AddAsync(ruleset);
+            //await dbContext.SaveChangesAsync();
+
             // Arrange
             // Act
-            var result = await _httpClient.GetAsync(Endpoint);
+            var result = await _httpClient.GetAsync($"{Endpoint}/{Guid.NewGuid()}");
             // Assert
-            Assert.Equal(HttpStatusCode.OK, result.StatusCode);
+            Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
         }
-
-        [Fact]
-        public async Task Should_respond_a_list_of_weather_forecast()
-        {
-            // Act
-            var result = await _httpClient.GetAsync(Endpoint);
-            var serialized =
-                JsonSerializer.Deserialize<List<Vehicle>>(await result.Content.ReadAsStringAsync());
-            // Assert
-            Assert.IsType<List<Vehicle>>(serialized);
-        }
-    }
-
-    public class Post(CustomWebApplicationFactory<Program> webApplicationFactory)
-        : VehiclesControllerTest(webApplicationFactory)
-    {
-        //TODO: IMPLEMENT POST TESTS
     }
 }

@@ -4,9 +4,9 @@ using MicroserviceTemplate.Application.Features.Vehicle.Create;
 using MicroserviceTemplate.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MicroserviceTemplate.Api.Controllers;
+namespace MicroserviceTemplate.Api.Controllers.v2;
 
-[ApiVersion("1.0")]
+[ApiVersion("2.0")]
 [ApiController]
 [Route("api/{version:apiVersion}/[controller]")]
 public partial class VehiclesController : ControllerBase
